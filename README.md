@@ -2,9 +2,9 @@
 
 **Hierarchical Modeling of Human Language Processing with Large Language Model for Multimodal Depression Detection**
 
-Jihun Lee, Jisun Hong, Jaehyo Jung — *IEEE Transactions on Affective Computing* (under review, TAFFC-2025-08-0826)
-
 Official implementation of **CIEDep-Net** (Cognition–Interpretation–Expression Depression Network), a multimodal framework that predicts PHQ-8 depression severity by functionally modeling the three stages of human language processing.
+
+State : Under review
 
 ---
 
@@ -295,19 +295,6 @@ It converts the `{'Non_depression': [...], 'Moderate': [...], 'Severe': [...]}` 
 
 ---
 
-## Citation
-
-```bibtex
-@article{lee2025ciedepnet,
-  title   = {Hierarchical Modeling of Human Language Processing with Large Language Model
-             for Multimodal Depression Detection},
-  author  = {Lee, Jihun and Hong, Jisun and Jung, Jaehyo},
-  journal = {IEEE Transactions on Affective Computing},
-  year    = {2025},
-  note    = {Under review, TAFFC-2025-08-0826}
-}
-```
-
 ---
 
 ## Intended use
@@ -316,6 +303,3 @@ This is research code for depression-severity estimation on a benchmark corpus. 
 
 ---
 
-## License
-
-Code is released under the [MIT License](LICENSE). The DAIC-WOZ and E-DAIC corpora are governed by their own license from USC ICT and are not covered by it.
