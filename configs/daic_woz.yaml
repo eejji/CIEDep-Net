@@ -1,0 +1,124 @@
+# ---------------------------------------------------------------------------
+# CIEDep-Net / DAIC-WOZ
+# 논문: Hierarchical Modeling of Human Language Processing with Large Language
+#       Model for Multimodal Depression Detection (TAFFC-2025-08-0826)
+# ---------------------------------------------------------------------------
+dataset:
+  name: daic_woz
+  # DAIC-WOZ 원본 배포본 (참가자별 <ID>_P/ 폴더에 AUDIO.wav, TRANSCRIPT.csv)
+  raw_dir: "D:/__Conference_CBMS/Seperate_ellie_participant/Seperate_ellie_participant"
+  transcript_suffix: "_TRANSCRIPT.csv"
+  audio_suffix: "_AUDIO.wav"
+  # transcript 컬럼명 (DAIC-WOZ 원본 스키마)
+  transcript_columns:
+    start: start_time
+    stop: stop_time
+    speaker: speaker
+    text: text
+  interviewer_label: Ellie
+  participant_label: Participant
+  # 라벨 CSV
+  label_csv: "D:/__Conference_CBMS/Class_split_person.csv"
+  label_columns:
+    participant_id: Participant_ID
+    phq_score: PHQ8_Score
+    phq_class: "3 Class"
+  # transcript 결손으로 논문에서 제외한 참가자 (189 -> 186)
+  excluded_indices: [148, 155, 176]
+
+paths:
+  # 참가자 발화만 이어붙인 음성
+  participant_dir: "D:/__Conference_CBMS/Seperate_ellie_participant/Participant_data"
+  # 소수 클래스 증강본
+  augment_moderate_dir: "D:/__Journal_Audio/Augment_data_participant_audio/Moderate"
+  augment_severe_dir: "D:/__Journal_Audio/Augment_data_participant_audio/Severe"
+  # 턴 단위 오디오 / Whisper 전사 결과
+  turn_dir: "D:/__Journal_Audio/Turn"
+  transcript_pkl: "D:/__Journal_Audio/LLM/Whisper_output_f.pkl"
+  # LLM 산출물
+  llm_dir: "D:/__Journal_Audio/LLM"
+  # 특징
+  feature_dir: "D:/__Journal_Audio/Expression_feature"
+  mel_pkl: "D:/__Journal_Audio/Melspectrogram/melspectrogram.pkl"
+  # 체크포인트 / 결과
+  checkpoint_dir: "./outputs/daic_woz/checkpoints"
+  result_dir: "./outputs/daic_woz/results"
+
+audio:
+  sample_rate: 16000
+  window_sec: 4.0      # Table I: 4s가 최적
+  hop_sec: 3.0         # 1s overlap
+  n_mels: 80
+  frame_length_sec: 0.025
+  frame_stride_sec: 0.010
+  top_db: 80.0
+  # 참가자당 세그먼트 평균 길이 (제로패딩 기준). null 이면 데이터에서 자동 계산
+  pad_length: 227
+
+augment:
+  # PHQ-8 3구간: 0-9 non, 10-14 moderate, 15-24 severe
+  class_bins: [9, 14]
+  pitch_shift_range: [-3.0, 3.0]
+  pitch_min_gap: 0.5
+  time_stretch_range: [0.85, 1.15]
+  time_min_gap: 0.05
+  # 소수 클래스별 추가 생성 수 (논문: moderate 99, severe 102 -> 총 387)
+  moderate_extra: 99
+  severe_extra: 102
+
+llm:
+  model_id: "Qwen/Qwen2.5-7B-Instruct"
+  prompt_strategy: cot_self_consistency   # standard | cot | cot_self_consistency | cot_self_validation
+  n_samples: 5            # self-consistency 샘플 수
+  temperature: 0.8
+  top_p: 0.9
+  max_new_tokens: 1024
+  max_new_tokens_score: 32
+  score_scale: 24.0       # 0~1 생성 점수를 PHQ-8 범위로 환산할 때
+  sentence_embedder: "all-mpnet-base-v2"   # 768-d
+
+features:
+  expression_model: wav2vec2   # wav2vec2 | hubert | wavlm | unispeech_sat
+  ssl_model_ids:
+    wav2vec2: "facebook/wav2vec2-base-960h"
+    hubert: "facebook/hubert-large-ls960-ft"
+    wavlm: "microsoft/wavlm-large"
+    unispeech_sat: "microsoft/unispeech-sat-base"
+  whisper_model: "large"
+
+model:
+  d_input: 80            # mel bins
+  d_expr: 768            # wav2vec 2.0 차원
+  d_summary: 768         # all-mpnet-base-v2 차원
+  d_output: 1
+  # Cognition: 3-layer Bi-LSTM + LayerNorm
+  lstm_hidden_dims: [64, 128, 256]
+  lstm_bidirectional: true
+  # Interpretation: Transformer encoder
+  transformer_heads: 4
+  transformer_layers: 2
+  transformer_ff_dim: 512
+  summary_transformer_heads: 4
+  # Expression: Conformer
+  expression_backbone: conformer   # conformer | transformer
+  conformer_layers: 4
+  conformer_heads: 4
+  conformer_ff_expansion: 4
+  conformer_conv_expansion: 2
+  conformer_kernel_size: 31
+  dropout: 0.1
+  half_step_residual: true
+
+train:
+  seed: 128
+  n_splits: 5
+  test_size: 0.2
+  batch_size: 64
+  num_epochs: 500
+  lr: 1.0e-4
+  weight_decay: 5.0e-5
+  warmup_epochs: 10
+  eta_min: 1.0e-6
+  early_stopping_patience: 15
+  loss: huber
+  scale_expression_feature: true   # fold별 StandardScaler

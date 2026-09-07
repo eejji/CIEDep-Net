@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------------------
+# 데이터: DAIC-WOZ / E-DAIC 는 사용 허가가 필요한 데이터셋입니다.
+# 오디오, 전사, PHQ-8 라벨, LLM 생성 결과는 절대 커밋하지 마세요.
+# ---------------------------------------------------------------------------
+/data/
+/outputs/
+*.wav
+*.mp3
+*.flac
+*.pkl
+*.pt
+*.pth
+*.npy
+*.npz
+*.csv
+*.tsv
+*.xlsx
+
+# 예외: 설정 예시나 문서용 표는 필요하면 강제로 추가 (git add -f)
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 캐시 / 도구
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+Thumbs.db
+
+# 자격증명
+.env
+*.token
+hf_token*

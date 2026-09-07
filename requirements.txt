@@ -1,0 +1,27 @@
+# 논문 환경: Python 3.12, PyTorch 2.6, CUDA 12.8, NVIDIA H100 80GB
+# GPU 빌드는 https://pytorch.org 의 안내에 따라 설치하세요.
+torch>=2.6
+torchaudio>=2.6
+
+# 오디오 처리 / 증강
+librosa>=0.10
+soundfile>=0.12
+
+# 데이터 / 지표
+numpy>=1.26
+pandas>=2.0
+scipy>=1.11
+scikit-learn>=1.4
+PyYAML>=6.0
+
+# Interpretation stage (LLM, Whisper, 문장 임베딩)
+transformers>=4.45
+accelerate>=0.30
+sentence-transformers>=3.0
+openai-whisper>=20231117
+
+# 분석 / 시각화
+matplotlib>=3.8
+seaborn>=0.13
+bert-score>=0.3.13
+tqdm>=4.66
